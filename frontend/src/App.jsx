@@ -11,6 +11,9 @@ import ProductDetails from "./pages/ProductDetails.jsx";
 import Cart from "./pages/Cart.jsx";
 import Wishlist from "./pages/Wishlist.jsx";
 import Checkout from "./pages/Checkout.jsx";
+import Orders from "./pages/Orders.jsx";
+import OrderDetails from "./pages/OrderDetails.jsx";
+import OrderSuccess from "./pages/OrderSuccess.jsx";
 
 function AuthedLayout({ children }) {
   return (
@@ -35,6 +38,9 @@ export default function App() {
         <Route path="/cart" element={<ProtectedRoute><AuthedLayout><Cart /></AuthedLayout></ProtectedRoute>} />
         <Route path="/wishlist" element={<ProtectedRoute><AuthedLayout><Wishlist /></AuthedLayout></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute><AuthedLayout><Checkout /></AuthedLayout></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><AuthedLayout><Orders /></AuthedLayout></ProtectedRoute>} />
+        <Route path="/orders/:id" element={<ProtectedRoute><AuthedLayout><OrderDetails /></AuthedLayout></ProtectedRoute>} />
+        <Route path="/order-success/:id" element={<ProtectedRoute><AuthedLayout><OrderSuccess /></AuthedLayout></ProtectedRoute>} />
       </Routes>
     </CartProvider>
   );
