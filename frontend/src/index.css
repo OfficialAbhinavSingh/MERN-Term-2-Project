@@ -1,0 +1,27 @@
+:root {
+  --color-primary: #1a73e8;
+  --color-bg: #f7f8fa;
+  --color-text: #1f2937;
+  --radius: 8px;
+  font-family: system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
