@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import customerRoutes from "./routes/customer.routes.js";
+import productRoutes from "./routes/product.routes.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/customers", customerRoutes);
+app.use("/products", productRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "ShopKart API is running" });
