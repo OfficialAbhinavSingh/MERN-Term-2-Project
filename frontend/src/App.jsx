@@ -8,6 +8,8 @@ import Register from "./pages/Register.jsx";
 import Home from "./pages/Home.jsx";
 import Products from "./pages/Products.jsx";
 import ProductDetails from "./pages/ProductDetails.jsx";
+import Cart from "./pages/Cart.jsx";
+import Wishlist from "./pages/Wishlist.jsx";
 
 function AuthedLayout({ children }) {
   return (
@@ -29,6 +31,8 @@ export default function App() {
         <Route path="/home" element={<ProtectedRoute><AuthedLayout><Home /></AuthedLayout></ProtectedRoute>} />
         <Route path="/products" element={<ProtectedRoute><AuthedLayout><Products /></AuthedLayout></ProtectedRoute>} />
         <Route path="/products/:id" element={<ProtectedRoute><AuthedLayout><ProductDetails /></AuthedLayout></ProtectedRoute>} />
+        <Route path="/cart" element={<ProtectedRoute><AuthedLayout><Cart /></AuthedLayout></ProtectedRoute>} />
+        <Route path="/wishlist" element={<ProtectedRoute><AuthedLayout><Wishlist /></AuthedLayout></ProtectedRoute>} />
       </Routes>
     </CartProvider>
   );
