@@ -30,6 +30,16 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(async (req, res, next) => {
+  try {
+    await connectDB(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/shopkart");
+    next();
+  } catch (err) {
+    console.error("DB Connection Error:", err.message || err);
+    res.status(500).json({ message: "Database connection failed" });
+  }
+});
+
 app.use("/customers", customerRoutes);
 app.use("/products", productRoutes);
 app.use("/wishlist", wishlistRoutes);
@@ -53,12 +63,6 @@ const isMainModule = import.meta.url === `file://${process.argv[1]}`;
 
 if (isMainModule) {
   const port = process.env.PORT || 8081;
-  const dbUrl = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/shopkart";
-
-  connectDB(dbUrl)
-    .then(() => console.log("DB Connected Successfully"))
-    .catch((err) => console.error("DB Connection Error:", err.message || err));
-
   app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
   });
