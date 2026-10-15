@@ -70,7 +70,7 @@ export async function me(req, res) {
 }
 
 export async function logout(req, res) {
-  res.clearCookie("token");
+  res.clearCookie("token", { httpOnly: true, sameSite: "none", secure: true });
   res.json({ message: "Logged out" });
 }
 

@@ -25,15 +25,18 @@ export default function OrderDetails() {
   if (!order) return <p>Loading...</p>;
 
   const currentIndex = STATUS_FLOW.indexOf(order.status);
+  const isPaid = order.paymentStatus === "PAID";
 
   return (
     <div className="order-details-page">
       <h1>Order #{order._id}</h1>
       <p>Payment: {order.paymentStatus}</p>
 
+      {!isPaid && <p className="error-text">This order isn't paid yet — delivery status can't advance.</p>}
+
       <div className="status-timeline">
         {STATUS_FLOW.map((step, index) => (
-          <div key={step} className={`timeline-step ${index <= currentIndex ? "complete" : ""}`}>
+          <div key={step} className={`timeline-step ${isPaid && index <= currentIndex ? "complete" : ""}`}>
             {step}
           </div>
         ))}
@@ -42,7 +45,7 @@ export default function OrderDetails() {
       <div className="demo-status-progression">
         <h3>Demo Status Progression</h3>
         {STATUS_FLOW.map((step, index) => (
-          <button key={step} onClick={() => advanceStatus(step)} disabled={index <= currentIndex}>
+          <button key={step} onClick={() => advanceStatus(step)} disabled={!isPaid || index !== currentIndex + 1}>
             Set {step}
           </button>
         ))}

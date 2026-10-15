@@ -77,6 +77,18 @@ export async function verifyPayment(req, res) {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // Already paid: treat as idempotent success, never re-process side effects
+    // or let a stale/bad verification attempt flip a paid order to FAILED.
+    if (order.paymentStatus === "PAID") {
+      return res.json({ success: true, order });
+    }
+
+    // The signature only proves the (order_id, payment_id) pair came from Razorpay.
+    // It does not prove it belongs to THIS order unless we check the id ourselves.
+    if (razorpay_order_id !== order.razorpayOrderId) {
+      return res.status(400).json({ message: "Payment does not match this order" });
+    }
+
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -88,18 +100,29 @@ export async function verifyPayment(req, res) {
       return res.status(400).json({ message: "Payment verification failed" });
     }
 
-    order.paymentStatus = "PAID";
-    order.status = "PLACED";
-    order.razorpayPaymentId = razorpay_payment_id;
-    await order.save();
+    // Atomic PENDING -> PAID transition: only one concurrent request can win this.
+    const paidOrder = await Order.findOneAndUpdate(
+      { _id: shopKartOrderId, user: req.customerId, paymentStatus: { $ne: "PAID" } },
+      { $set: { paymentStatus: "PAID", status: "PLACED", razorpayPaymentId: razorpay_payment_id } },
+      { returnDocument: "after" }
+    );
 
-    for (const item of order.items) {
-      await Product.updateOne({ _id: item.product }, { $inc: { stock: -item.quantity } });
+    if (!paidOrder) {
+      const current = await Order.findById(shopKartOrderId);
+      return res.json({ success: true, order: current });
+    }
+
+    for (const item of paidOrder.items) {
+      // Conditional decrement: never takes stock below 0, even under a race.
+      await Product.updateOne(
+        { _id: item.product, stock: { $gte: item.quantity } },
+        { $inc: { stock: -item.quantity } }
+      );
     }
 
     await Customer.updateOne({ _id: req.customerId }, { $set: { cart: [] } });
 
-    res.json({ success: true, order });
+    res.json({ success: true, order: paidOrder });
   } catch (err) {
     res.status(500).json({ message: "Payment verification error", error: err.message });
   }
@@ -129,6 +152,16 @@ export async function updateOrderStatus(req, res) {
   const order = await Order.findOne({ _id: req.params.id, user: req.customerId });
   if (!order) {
     return res.status(404).json({ message: "Order not found" });
+  }
+
+  if (order.paymentStatus !== "PAID") {
+    return res.status(400).json({ message: "Order must be paid before advancing status" });
+  }
+
+  const currentIndex = STATUS_FLOW.indexOf(order.status);
+  const nextIndex = STATUS_FLOW.indexOf(status);
+  if (nextIndex !== currentIndex + 1) {
+    return res.status(400).json({ message: "Status can only advance one step at a time" });
   }
 
   order.status = status;

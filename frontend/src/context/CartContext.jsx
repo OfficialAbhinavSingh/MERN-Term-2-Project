@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import api from "../services/api.js";
 
 const CartContext = createContext(null);
@@ -28,6 +28,11 @@ export function CartProvider({ children }) {
   }, []);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  useEffect(() => {
+    refreshCart();
+    refreshWishlistCount();
+  }, [refreshCart, refreshWishlistCount]);
 
   return (
     <CartContext.Provider value={{ cart, cartCount, wishlistCount, refreshCart, refreshWishlistCount, setCart }}>

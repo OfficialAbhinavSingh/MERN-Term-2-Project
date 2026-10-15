@@ -73,6 +73,7 @@ npm test
 | Variable | Description |
 | --- | --- |
 | `PORT` | Port the API listens on (default 8081) |
+| `CLIENT_URL` | Exact origin of the frontend, used to allowlist CORS (e.g. `http://localhost:5173`) |
 | `MONGO_URI` | MongoDB connection string (Atlas or local) |
 | `JWT_SECRET` | Secret used to sign JWTs |
 | `RAZORPAY_KEY_ID` | Razorpay API key ID |

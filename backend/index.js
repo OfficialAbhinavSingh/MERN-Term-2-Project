@@ -15,7 +15,7 @@ app.set("trust proxy", 1);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin) {
+  if (origin && origin === process.env.CLIENT_URL) {
     res.header("Access-Control-Allow-Origin", origin);
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
@@ -38,6 +38,15 @@ app.use("/orders", orderRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "ShopKart API is running" });
+});
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (err.name === "CastError") {
+    return res.status(400).json({ message: "Invalid id" });
+  }
+  console.error(err);
+  res.status(500).json({ message: "Internal server error" });
 });
 
 const isMainModule = import.meta.url === `file://${process.argv[1]}`;

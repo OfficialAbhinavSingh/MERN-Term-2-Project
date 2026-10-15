@@ -2,13 +2,19 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
 import { CartIcon, HeartIcon } from "./Icons.jsx";
 import SearchBar from "./SearchBar.jsx";
+import api from "../services/api.js";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const { cartCount, wishlistCount } = useCart();
   const isLoggedIn = Boolean(localStorage.getItem("token"));
 
-  function handleLogout() {
+  async function handleLogout() {
+    try {
+      await api.post("/customers/logout");
+    } catch (err) {
+      // backend session clear failed or was unreachable; still clear client state below
+    }
     localStorage.removeItem("token");
     navigate("/login");
   }
